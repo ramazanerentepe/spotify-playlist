@@ -11,7 +11,7 @@
 *.db
 *.sqlite
 *.sqlite3
-data/history.db
+data/spotify_listening.db
 
 # ========================================
 # 3. PYTHON ÖNBELLEK VE DERLEME DOSYALARI
