@@ -117,6 +117,86 @@ class SpotifyDB:
         except sqlite3.Error as e:
             logger.error(f"Veritabanı başlatma hatası: {e}")
 
+   
+    def add_track(self, track_data):
+        sql = ''' 
+            INSERT OR IGNORE INTO tracks
+            (track_id, track_name, artist_name, duration_ms, energy, tempo, valence)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+          '''
+        try:
+            with self.get_connection() as conn:
+                conn.execute(sql, track_data)
+                
+                conn.commit()
+                logger.info(f"✅ Şarkı veritabanına kaydedildi: {track_data[1]}")
+        except sqlite3.Error as e:
+            logger.error(f"Şarkı eklenirken veritabanı hatası oluştu: {e}")
+
+    def add_listening_history(self, track_id, played_at):
+        sql = ''' 
+            INSERT INTO listening_history
+            (track_id, played_at) 
+            VALUES (?, ?)
+            '''
+        try:
+            with self.get_connection() as conn:
+                conn.execute(sql, (track_id, played_at))
+                
+                conn.commit()
+                logger.info(f"✅ Dinleme geçmişi kaydedildi: Track ID {track_id} - Played At {played_at}")
+        except sqlite3.Error as e:
+            logger.error(f"Dinleme geçmişi eklenirken veritabanı hatası oluştu: {e}")
+
+    def process_played_track(self, track_data, played_at):
+        self.add_track(track_data)
+        self.add_listening_history(track_data[0], played_at)
+
+    def get_last_played_time(self):
+        sql = ''' 
+            SELECT MAX(played_at) FROM listening_history'''
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.execute(sql)
+                result = cursor.fetchone()
+                last_played = result[0] if result and result[0] else None
+                logger.info(f"Son dinleme zamanı: {last_played}")
+                return last_played  
+        except sqlite3.Error as e:
+            logger.error(f"Son dinleme zamanını çekerken veritabanı hatası oluştu: {e}")
+            return None
+
+    def clear_weekly_data(self):
+        sql = '''
+            DELETE FROM listening_history;
+            DELETE FROM tracks;
+        '''
+        try:
+            with self.get_connection() as conn:
+                conn.executescript(sql)
+                conn.commit()
+                logger.info("✅ Haftalık veriler temizlendi. Yeni haftaya hazırız!")
+        except sqlite3.Error as e:
+            logger.error(f"Haftalık verileri temizlerken veritabanı hatası oluştu: {e}")
+
+    def get_weekly_tracks(self):
+        sql = '''
+            SELECT t.track_id, t.track_name, t.artist_name, t.duration_ms, t.energy, t.tempo, t.valence,
+                   COUNT(l.history_id) AS play_count
+            FROM tracks t
+            JOIN listening_history l ON t.track_id = l.track_id
+            GROUP BY t.track_id
+            ORDER BY play_count DESC'''
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.execute(sql)
+                tracks = cursor.fetchall()
+                logger.info(f"Haftalık şarkılar çekildi: {len(tracks)} şarkı bulundu.")
+                return tracks
+        except sqlite3.Error as e:
+            logger.error(f"Haftalık şarkıları çekerken veritabanı hatası oluştu: {e}")
+            return []
+
 # Modül testi için
 if __name__ == "__main__":
     db_manager = SpotifyDB()
