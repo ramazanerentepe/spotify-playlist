@@ -1,0 +1,42 @@
+# ========================================
+# 1. KİMLİK BİLGİLERİ VE ŞİFRELER (GÜVENLİK)
+# ========================================
+.env
+.env.*
+!.env.example   # .env engelli ama .env.example GitHub'a gitsin diye istisna ekledik
+
+# ========================================
+# 2. YEREL VERİTABANI VE VERİLER
+# ========================================
+*.db
+*.sqlite
+*.sqlite3
+data/history.db
+
+# ========================================
+# 3. PYTHON ÖNBELLEK VE DERLEME DOSYALARI
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ========================================
+# 4. SANAL ORTAMLAR (VIRTUAL ENVIRONMENTS)
+# ========================================
+venv/
+env/
+.venv/
+Pipfile.lock
+
+# ========================================
+# 5. LOG DOSYALARI (HATA KAYITLARI)
+# ========================================
+*.log
+
+# ========================================
+# 6. IDE VE İŞLETİM SİSTEMİ DOSYALARI
+# ========================================
+.vscode/        # VS Code ayar klasörü
+.idea/          # PyCharm ayar klasörü
+.DS_Store       # macOS gizli dosyası
+Thumbs.db       # Windows önizleme önbelleği
