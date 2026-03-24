@@ -39,4 +39,8 @@ Pipfile.lock
 .vscode/       
 .idea/          
 .DS_Store       
-Thumbs.db       
+Thumbs.db     
+# ========================================
+# 7. KİŞİSEL NOTLAR VE GEÇİCİ DOSYALAR
+# ========================================
+notlar.txt
