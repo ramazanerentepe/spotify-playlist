@@ -3,7 +3,7 @@
 # ========================================
 .env
 .env.*
-!.env.example   # .env engelli ama .env.example GitHub'a gitsin diye istisna ekledik
+!.env.example   
 
 # ========================================
 # 2. YEREL VERİTABANI VE VERİLER
@@ -36,7 +36,7 @@ Pipfile.lock
 # ========================================
 # 6. IDE VE İŞLETİM SİSTEMİ DOSYALARI
 # ========================================
-.vscode/        # VS Code ayar klasörü
-.idea/          # PyCharm ayar klasörü
-.DS_Store       # macOS gizli dosyası
-Thumbs.db       # Windows önizleme önbelleği
+.vscode/       
+.idea/          
+.DS_Store       
+Thumbs.db       
