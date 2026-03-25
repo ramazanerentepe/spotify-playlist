@@ -52,7 +52,8 @@ class SpotifyDB:
             "weekly_reports": {
                 "columns": {
                     "report_id", "created_at", "total_minutes", "top_track_1", "top_track_2", 
-                    "top_track_3", "avg_energy", "avg_tempo", "avg_valence", "mood_label"
+                    "top_track_3", "avg_energy", "avg_tempo", "avg_valence", "mood_label",
+                    "liked_tracks_count"
                 },
                 "create_sql": '''
                     CREATE TABLE IF NOT EXISTS weekly_reports (
@@ -65,7 +66,18 @@ class SpotifyDB:
                         avg_energy REAL,
                         avg_tempo REAL,
                         avg_valence REAL,
-                        mood_label TEXT
+                        mood_label TEXT,
+                        liked_tracks_count INTEGER
+                    )''',
+                "indices": []
+            },
+            "liked_tracks": {
+                "columns": {"track_id", "added_at"},
+                "create_sql": '''
+                    CREATE TABLE IF NOT EXISTS liked_tracks (
+                        track_id TEXT PRIMARY KEY,
+                        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (track_id) REFERENCES tracks (track_id)
                     )''',
                 "indices": []
             }
@@ -133,6 +145,20 @@ class SpotifyDB:
         except sqlite3.Error as e:
             logger.error(f"Şarkı eklenirken veritabanı hatası oluştu: {e}")
 
+    def add_liked_track(self, track_id):
+        sql = ''' 
+            INSERT OR IGNORE INTO liked_tracks (track_id) 
+            VALUES (?)
+            '''
+        try:
+            with self.get_connection() as conn:
+                conn.execute(sql, (track_id,))
+                
+                conn.commit()
+                logger.info(f"❤️ Şarkı beğenilenlere eklendi: {track_id}")
+        except sqlite3.Error as e:
+            logger.error(f"Beğenilen şarkı eklenirken veritabanı hatası oluştu: {e}")
+
     def add_listening_history(self, track_id, played_at):
         sql = ''' 
             INSERT INTO listening_history
@@ -169,7 +195,7 @@ class SpotifyDB:
     def clear_weekly_data(self):
         sql = '''
             DELETE FROM listening_history;
-            DELETE FROM tracks;
+            DELETE FROM tracks WHERE track_id NOT IN (SELECT track_id FROM liked_tracks);
         '''
         try:
             with self.get_connection() as conn:
@@ -182,11 +208,13 @@ class SpotifyDB:
     def get_weekly_tracks(self):
         sql = '''
             SELECT t.track_id, t.track_name, t.artist_name, t.duration_ms, t.energy, t.tempo, t.valence,
-                   COUNT(l.history_id) AS play_count
+                   COUNT(l.history_id) AS play_count,
+                   (CASE WHEN lt.track_id IS NOT NULL THEN 1 ELSE 0 END) AS is_liked
             FROM tracks t
             JOIN listening_history l ON t.track_id = l.track_id
+            LEFT JOIN liked_tracks lt ON t.track_id = lt.track_id
             GROUP BY t.track_id
-            ORDER BY play_count DESC'''
+            ORDER BY is_liked DESC, play_count DESC'''
         try:
             with self.get_connection() as conn:
                 cursor = conn.execute(sql)
