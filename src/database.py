@@ -193,15 +193,21 @@ class SpotifyDB:
             return None
 
     def clear_weekly_data(self):
+        """
+        GÖREVİ: 'listening_history', 'liked_tracks' ve 'tracks' tablolarındaki TÜM verileri kalıcı olarak silmek.
+        NEDEN LAZIM?: Her hafta yepyeni bir "sıfırdan" müzik zevki analizi yapmak için 
+        sistem hafızasını tamamen sıfırlar. Kalıcı hafıza zaten Spotify'da var.
+        """
         sql = '''
             DELETE FROM listening_history;
-            DELETE FROM tracks WHERE track_id NOT IN (SELECT track_id FROM liked_tracks);
+            DELETE FROM liked_tracks;
+            DELETE FROM tracks;
         '''
         try:
             with self.get_connection() as conn:
                 conn.executescript(sql)
                 conn.commit()
-                logger.info("✅ Haftalık veriler temizlendi. Yeni haftaya hazırız!")
+                logger.info("✅ Haftalık hafıza tamamen sıfırlandı. Yeni haftaya tertemiz başlıyoruz!")
         except sqlite3.Error as e:
             logger.error(f"Haftalık verileri temizlerken veritabanı hatası oluştu: {e}")
 
