@@ -9,18 +9,26 @@ logger = setup_logger("SpotifyAPI")
 
 class SpotifyClient:
     def __init__(self):
-        """
-        GÖREVİ: Sınıf başlatıldığında .env dosyasındaki bilgileri okur.
-        NEDEN PKCE?: Masaüstü uygulaması yapacağımız için Client Secret KULLANILMAZ.
-        """
-        pass
+        load_dotenv()
+        self.client_id = os.getenv("SPOTIPY_CLIENT_ID")
+        self.redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
+        if not self.client_id or not self.redirect_uri:
+            logger.error("SPOTIPY_CLIENT_ID veya SPOTIPY_REDIRECT_URI .env dosyasında tanımlı değil!")
+            raise ValueError("Gerekli Spotify API bilgileri eksik.")
+        self.scope = "user-read-recently-played user-library-read playlist-modify-public playlist-modify-private"
+        self.auth_manager = SpotifyPKCE(client_id=self.client_id, redirect_uri=self.redirect_uri, scope=self.scope)
+        self.sp = None
+        logger.info("✅ Spotify API motoru başlatıldı, kimlik belgeleri hazırlandı.")
 
     def authenticate(self):
-        """
-        GÖREVİ: Kullanıcıyı tarayıcıya yönlendirip Spotify'a güvenli giriş yapmasını sağlar.
-        NASIL ÇALIŞACAK?: Eğer kullanıcı zaten giriş yaptıysa sessizce arkadan yenileyecek.
-        """
-        pass
+        try:
+            self.auth_manager.get_access_token()
+            self.sp = spotipy.Spotify(auth_manager=self.auth_manager)
+            user_profile = self.sp.me()
+            logger.info(f"✅ Spotify bağlantısı BAŞARILI! Hoş geldin, {user_profile['display_name']}!")
+        except Exception as e:
+            logger.error(f"Spotify kimlik doğrulama hatası: {e}")
+            raise e
 
     def get_recently_played(self, after_timestamp=None):
         """
@@ -69,3 +77,10 @@ class SpotifyClient:
 # Modül testi için
 if __name__ == "__main__":
     logger.info("Spotify API iskeleti (Tek Liste Mantığı) hazır!")
+    logger.info("Spotify API testi başlatılıyor...")
+    
+    # 1. Robotumuzu oluştur (Bu esnada __init__ çalışacak ve .env okunacak)
+    spotify_bot = SpotifyClient()
+    
+    # 2. Giriş yapmayı dene (Bu esnada tarayıcı açılacak)
+    spotify_bot.authenticate()
