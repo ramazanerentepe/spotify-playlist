@@ -1,12 +1,9 @@
 import sqlite3
 import os
 import logging
+from logger_config import setup_logger
 
-# --- LOGGING YAPILANDIRMASI ---
-# İşlemleri takip etmek için profesyonel günlükleme sistemi.
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("DatabaseGuard")
-
+logger = setup_logger("SpotifyDB")
 class SpotifyDB:
     def __init__(self, db_path=None):
         """

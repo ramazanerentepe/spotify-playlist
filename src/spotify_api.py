@@ -3,10 +3,9 @@ import logging
 import spotipy
 from spotipy.oauth2 import SpotifyPKCE
 from dotenv import load_dotenv
+from logger_config import setup_logger 
 
-# --- LOGGING YAPILANDIRMASI ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("SpotifyAPI")
+logger = setup_logger("SpotifyAPI")
 
 class SpotifyClient:
     def __init__(self):
