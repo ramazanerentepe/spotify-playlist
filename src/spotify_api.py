@@ -28,7 +28,15 @@ class SpotifyClient:
             logger.info(f"✅ Spotify bağlantısı BAŞARILI! Hoş geldin, {user_profile['display_name']}!")
         except Exception as e:
             logger.error(f"Spotify kimlik doğrulama hatası: {e}")
-            raise e
+            if os.path.exists(".cache"):
+                os.remove(".cache")  # Eski token'ı temizle
+                logger.info("Eski token temizlendi, lütfen tekrar deneyin.")
+                self.auth_manager = SpotifyPKCE(client_id=self.client_id, redirect_uri=self.redirect_uri, scope=self.scope)  # Auth manager'ı sıfırla
+                self.sp = spotipy.Spotify(auth_manager=self.auth_manager)  
+                user_profile = self.sp.me()
+                logger.info(f"✅ Spotify bağlantısı BAŞARILI! Hoş geldin, {user_profile['display_name']}!")
+            else: 
+                raise e
 
     def get_recently_played(self, after_timestamp=None):
         """
