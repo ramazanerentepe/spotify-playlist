@@ -39,24 +39,73 @@ class SpotifyClient:
                 raise e
 
     def get_recently_played(self, after_timestamp=None):
-        """
-        GÖREVİ: Kullanıcının en son dinlediği şarkıları çeker (Catch-up).
-        """
-        pass
+        try :
+            result = self.sp.current_user_recently_played(limit=50, after=after_timestamp)
+            items = result.get("items", [])
+            tracks_data = []
+            for item in items:
+                track = item['track']
+                clean_track = {
+                    'track_id': track['id'],
+                    'track_name': track['name'],
+                    'artist_name': track['artists'][0]['name'], 
+                    'duration_ms': track['duration_ms'],
+                    'played_at': item['played_at']
+                }
+                tracks_data.append(clean_track)
+                logger.info(f"🎧 Son dinlenen {len(tracks_data)} şarkı başarıyla çekildi.")
+                return tracks_data
+        except Exception as e:
+            logger.error(f"Spotify API hatası (get_recently_played): {e}")
+            return []
+
 
     def get_audio_features(self, track_ids):
-        """
-        GÖREVİ: Verilen şarkıların müzikal röntgenini (enerji, tempo vb.) çeker.
-        """
-        pass
+        try:
+            if not track_ids:
+                return []
+            clean_features = []
+            for i in range(0, len(track_ids),100):
+                batch = track_ids[i:i+100]
+                features = self.sp.audio_features(tracks=batch)
+                for f in features:
+                    if f is not None:
+                        clean_features.append({
+                            'track_id': f['id'],
+                            'energy': f['energy'],
+                            'tempo': f['tempo'],
+                            'valence': f['valence'],
+                        })
+            logger.info(f"🎵 {len(clean_features)} şarkının müzikal özellikleri başarıyla çekildi.")
+            return clean_features
+        except Exception as e:
+            logger.error(f"Spotify API hatası (get_audio_features): {e}")
+            return []
 
-    def get_liked_tracks(self, limit=50):
-        """
-        GÖREVİ: Kullanıcının beğendiği son şarkıları çeker. Algoritmayı beslemek için.
-        """
-        pass
+    def get_liked_tracks(self, limit=50 ,after_timestamp=None):
+        try:
+            liked_tracks = []
+            ofset_count = 0
+            while True:
+                result = self.sp.current_user_saved_tracks(limit = limit, offset=ofset_count*limit)
+                if not result['items']:
+                    break
+                for item in result['items']:
+                    if after_timestamp and item['added_at'] <= after_timestamp:
+                        logger.info(f"🎶 Liked tracks çekme tamamlandı. Toplam {len(liked_tracks)} şarkı çekildi.")
+                        return liked_tracks
+                    track = item['track']
+                    liked_tracks.append({
+                        'track_id': track['id'],
+                        "added_at": item['added_at']
+                    })
+                ofset_count += 1
+                logger.info(f"❤️ Kütüphanedeki tüm {len(liked_tracks)} beğenilen şarkı başarıyla çekildi.")
+                return liked_tracks
+        except Exception as e:
+            logger.error(f"Spotify API hatası (get_liked_tracks): {e}")
+            return []
 
-    # --- YENİ EKLENEN / GÜNCELLENEN FONKSİYONLAR ---
 
     def get_or_create_playlist(self, name="Haftalık Modum", description="Ruh halime göre her hafta otomatik güncellenir."):
         """
