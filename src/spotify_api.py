@@ -16,7 +16,7 @@ class SpotifyClient:
         if not self.client_id or not self.redirect_uri:
             logger.error("SPOTIPY_CLIENT_ID veya SPOTIPY_REDIRECT_URI .env dosyasında tanımlı değil!")
             raise ValueError("Gerekli Spotify API bilgileri eksik.")
-        self.scope = "user-read-recently-played user-library-read playlist-modify-public playlist-modify-private playlist-read-private"
+        self.scope = "user-read-recently-played user-library-read playlist-modify-public playlist-modify-private playlist-read-private user-read-email"
         self.auth_manager = SpotifyPKCE(client_id=self.client_id, redirect_uri=self.redirect_uri, scope=self.scope)
         self.sp = None
         logger.info("✅ Spotify API motoru başlatıldı, kimlik belgeleri hazırlandı.")
@@ -27,6 +27,8 @@ class SpotifyClient:
             self.sp = spotipy.Spotify(auth_manager=self.auth_manager)
             user_profile = self.sp.me()
             logger.info(f"✅ Spotify bağlantısı BAŞARILI! Hoş geldin, {user_profile['display_name']}!")
+            logger.info(f"🔍 Bağlı olan hesap e-postası: {user_profile.get('email')}")
+            logger.info(f"🔍 Kullanıcı ID: {user_profile.get('id')}")
         except Exception as e:
             logger.error(f"Spotify kimlik doğrulama hatası: {e}")
             if os.path.exists(".cache"):
@@ -120,6 +122,7 @@ class SpotifyClient:
                         logger.info(f"✅ '{name}' adlı çalma listesi bulundu, ID'si: {item['id']}")
                         return item['id']
                 ofset_count += 1
+            logger.info(f"⚠️ '{name}' adlı çalma listesi bulunamadı, yeni bir tane oluşturulacak.")
             user_id = self.sp.me()['id']
             new_playlist = self.sp.user_playlist_create(user=user_id, name=name, public=False, description=description)
             logger.info(f"✅ '{name}' adlı yeni çalma listesi oluşturuldu, ID'si: {new_playlist['id']}")
@@ -173,7 +176,7 @@ if __name__ == "__main__":
     
     # 4. Liste İşlemleri
     logger.info("--- TEST 4: Çalma Listesi Operasyonları ---")
-    playlist_id = spotify_bot.get_or_create_playlist(name="Haftalık Modum Test", description="API Test Listesidir.")
+    playlist_id = spotify_bot.get_or_create_playlist(name="Haftalık Modum", description="API Test Listesidir.")
     
     if playlist_id:
         spotify_bot.clear_playlist(playlist_id)
