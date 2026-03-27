@@ -27,8 +27,6 @@ class SpotifyClient:
             self.sp = spotipy.Spotify(auth_manager=self.auth_manager)
             user_profile = self.sp.me()
             logger.info(f"✅ Spotify bağlantısı BAŞARILI! Hoş geldin, {user_profile['display_name']}!")
-            logger.info(f"🔍 Bağlı olan hesap e-postası: {user_profile.get('email')}")
-            logger.info(f"🔍 Kullanıcı ID: {user_profile.get('id')}")
         except Exception as e:
             logger.error(f"Spotify kimlik doğrulama hatası: {e}")
             if os.path.exists(".cache"):
