@@ -162,11 +162,6 @@ if __name__ == "__main__":
     logger.info("--- TEST 1: Son Dinlenenler ---")
     recent_tracks = spotify_bot.get_recently_played()
     
-    # 3. Audio Features (Spotify Yasakladığı için hata verecek ama program çökmeyecek)
-    if recent_tracks:
-        logger.info("--- TEST 2: Müzikal Özellikler ---")
-        test_track_ids = [track['track_id'] for track in recent_tracks]
-        features = spotify_bot.get_audio_features(test_track_ids)
     
     # 4. Beğenilenleri çek (SADECE SON 1 HAFTA!)
     logger.info("--- TEST 3: Beğenilen Şarkılar (1 Haftalık Sınır) ---")
