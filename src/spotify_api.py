@@ -108,13 +108,24 @@ class SpotifyClient:
 
 
     def get_or_create_playlist(self, name="Haftalık Modum", description="Ruh halime göre her hafta otomatik güncellenir."):
-        """
-        GÖREVİ: Kullanıcının kütüphanesini tarar. 
-        Eğer 'name' adında bir liste ZATEN VARSA onun ID'sini döndürür.
-        YOKSA (ilk kurulumsa) yeni bir liste oluşturup onun ID'sini döndürür.
-        NEDEN LAZIM?: Kütüphaneyi çöplüğe çevirmemek, tek listeyi kullanmak için.
-        """
-        pass
+        try:
+            ofset_count = 0
+            while True:
+                result = self.sp.current_user_playlists(limit=50 , offset=ofset_count*50)
+                if not result['items']:
+                    break
+                for item in result['items']:
+                    if item['name'] == name:
+                        logger.info(f"✅ '{name}' adlı çalma listesi bulundu, ID'si: {item['id']}")
+                        return item['id']
+                ofset_count += 1
+            user_id = self.sp.me()['id']
+            new_playlist = self.sp.user_playlist_create(user=user_id, name=name, public=True, description=description)
+            logger.info(f"✅ '{name}' adlı yeni çalma listesi oluşturuldu, ID'si: {new_playlist['id']}")
+            return new_playlist['id']
+        except Exception as e:
+            logger.error(f"Spotify API hatası (get_or_create_playlist): {e}")
+            return None
 
     def clear_playlist(self, playlist_id):
         """
