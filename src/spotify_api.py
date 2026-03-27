@@ -128,27 +128,62 @@ class SpotifyClient:
             return None
 
     def clear_playlist(self, playlist_id):
-        """
-        GÖREVİ: Verilen çalma listesinin içindeki TÜM şarkıları siler.
-        NEDEN LAZIM?: Yeni haftanın şarkılarını eklemeden önce, listeyi tertemiz 
-        bir boş tuvale dönüştürmek için.
-        """
-        pass
+        try:
+            self.sp.playlist_replace_items(playlist_id, [])
+            logger.info(f"🧹 Çalma listesi (ID: {playlist_id}) temizlendi, artık yeni şarkılar eklenmeye hazır!")
+        except Exception as e:
+            logger.error(f"Spotify API hatası (clear_playlist): {e}")
 
     def update_playlist_tracks(self, playlist_id, track_ids):
         """
         GÖREVİ: Algoritmanın (algorithm.py) seçtiği yepyeni şarkıları, 
         az önce temizlediğimiz o sabit listenin içine doldurur.
         """
-        pass
+        try:
+            if not track_ids:
+                logger.warning("⚠️ Güncellenecek şarkı ID'si yok, çalma listesi güncellenmeyecek.")
+                return
+            self.sp.playlist_replace_items(playlist_id, track_ids)
+            logger.info(f"✅ Çalma listesi (ID: {playlist_id}) başarıyla güncellendi! Toplam {len(track_ids)} şarkı eklendi.")
+        except Exception as e:
+            logger.error(f"Spotify API hatası (update_playlist_tracks - ID toplama): {e}")
+            return
 
-# Modül testi için
+# Modül testi için (Test Pisti)
 if __name__ == "__main__":
-    logger.info("Spotify API iskeleti (Tek Liste Mantığı) hazır!")
-    logger.info("Spotify API testi başlatılıyor...")
+    logger.info("🚀 SPOTIFY API GENEL TESTİ BAŞLIYOR...")
     
-    # 1. Robotumuzu oluştur (Bu esnada __init__ çalışacak ve .env okunacak)
+    # 1. Motoru çalıştır ve giriş yap
     spotify_bot = SpotifyClient()
-    
-    # 2. Giriş yapmayı dene (Bu esnada tarayıcı açılacak)
     spotify_bot.authenticate()
+    
+    # 2. Son dinlenenleri çek (Testin hızlı bitmesi için limit koymadık, API'den geleni alır)
+    logger.info("--- TEST 1: Son Dinlenenler ---")
+    recent_tracks = spotify_bot.get_recently_played()
+    
+    # 3. Audio Features Testi (Eğer recent_tracks boş değilse)
+    if recent_tracks:
+        logger.info("--- TEST 2: Müzikal Özellikler ---")
+        # Elimizdeki sözlükten sadece track_id'leri cımbızlayıp bir liste yapıyoruz
+        test_track_ids = [track['track_id'] for track in recent_tracks]
+        features = spotify_bot.get_audio_features(test_track_ids)
+    
+    # 4. Beğenilenleri çek
+    logger.info("--- TEST 3: Beğenilen Şarkılar (Sayfalama Testi) ---")
+    # Çok uzun sürmemesi için bir zaman sınırı koyabilirsin (isteğe bağlı) veya direkt çalıştırırsın.
+    # Burada direkt çalıştırıp kütüphanedeki sayfalama mantığını test ediyoruz.
+    liked = spotify_bot.get_liked_tracks(limit=50) 
+    
+    # 5. Liste İşlemleri
+    logger.info("--- TEST 4: Çalma Listesi Operasyonları ---")
+    playlist_id = spotify_bot.get_or_create_playlist(name="Haftalık Modum Test", description="API Test Listesidir.")
+    
+    if playlist_id:
+        # Önce listeyi temizle
+        spotify_bot.clear_playlist(playlist_id)
+        
+        # Sonra elimizdeki o test_track_ids listesini bas!
+        if recent_tracks:
+            spotify_bot.update_playlist_tracks(playlist_id, test_track_ids)
+            
+    logger.info("🎉 TÜM TESTLER BAŞARIYLA TAMAMLANDI!")
