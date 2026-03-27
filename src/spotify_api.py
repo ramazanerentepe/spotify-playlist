@@ -60,7 +60,7 @@ class SpotifyClient:
             logger.error(f"Spotify API hatası (get_recently_played): {e}")
             return []
 
-
+    """
     def get_audio_features(self, track_ids):
         try:
             if not track_ids:
@@ -82,7 +82,7 @@ class SpotifyClient:
         except Exception as e:
             logger.error(f"Spotify API hatası (get_audio_features): {e}")
             return []
-
+    """
     def get_liked_tracks(self, limit=50 ,after_timestamp=None):
         try:
             liked_tracks = []
