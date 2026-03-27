@@ -1,36 +1,39 @@
-# 🎵 Spotify Weekly Mood & Dynamic Playlist Generator
+# 🎵 Context-Aware Weekly Playlist Generator (Spotify x Last.fm)
 
-> **"Spotify algoritmalarının yankı odasından çıkın. Kendi müzik zevkinizin patronu olun."**
+> **"Spotify algoritmalarının yankı odasından çıkın, API sınırlarını zekice aşın. Kendi müzik zevkinizin patronu olun."**
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue?style=flat&logo=python)
 ![SQLite](https://img.shields.io/badge/SQLite-Local_Vault-lightgrey?style=flat&logo=sqlite)
-![Spotify API](https://img.shields.io/badge/Spotify_API-Integrated-1ED760?style=flat&logo=spotify)
+![Spotify API](https://img.shields.io/badge/Spotify_API-Data_Source-1ED760?style=flat&logo=spotify)
+![Last.fm API](https://img.shields.io/badge/Last.fm_API-Mood_Enrichment-d51007?style=flat&logo=last.fm)
 ![Security](https://img.shields.io/badge/Security-PKCE_Flow-red?style=flat&logo=security)
 
-## 🚀 Neden Bu Projeye İhtiyacın Var?
-Spotify'ın size sürekli aynı 50 şarkıyı önermesinden sıkılmadınız mı? Sırf geçen ay birkaç melankolik şarkı dinlediniz diye tüm "Haftalık Keşif" listenizin mahvolmasına ne demeli? 
+## 🚀 Projenin Vizyonu
 
-Standart algoritmalar geçmişinize pranga vurur. **Biz ise bu prangaları kırıyoruz.** Bu proje; kendi bilgisayarınızda çalışan, tamamen size özel ve %100 gizliliğe saygı duyan kişisel bir yapay zeka DJ'idir. Sizi arka planda sessizce dinler, o haftaki müzikal DNA'nızın (enerji, tempo, akustiklik) matematiğini çıkarır ve her hafta size nokta atışı, yepyeni bir "Ruh Hali" listesi sunar.
+Spotify'ın size sürekli aynı 50 şarkıyı önermesinden sıkılmadınız mı? Üstelik Spotify'ın yakın zamanda geliştiricilere şarkı ruh hali (`audio-features`) verilerini kapatmasıyla standart tavsiye algoritmaları da tıkandı.
 
-## ✨ Sizi Neler Bekliyor? (Özellikler)
+**Biz duvarlara takılmayız, etrafından dolaşırız.** Bu proje; Spotify'ın API kısıtlamalarını **Last.fm'in devasa insan odaklı veri tabanıyla (Data Enrichment)** aşan kişisel bir yapay zeka DJ'idir. Sizi arka planda sessizce dinler, dinlediğiniz şarkıların hissini gerçek insanların girdiği etiketlerle (tag) analiz eder ve her hafta size nokta atışı, bağlam odaklı (context-aware) yeni bir çalma listesi sunar.
 
-* 🧠 **Haftalık Hafıza Kaybı (Gerçek Dinamiklik):** Diğer algoritmalar geçmişinize takılıp kalır. Bizim motorumuz ise her hafta sonu yerel hafızasını tamamen siler. Yeni haftaya "sıfırdan" ve %100 o anki ruh halinize (odaklanmış, enerjik, depresif) odaklanarak başlar.
-* 🛡️ **Banka Seviyesinde Şifresiz Güvenlik (PKCE):** Uygulama hiçbir şekilde "Client Secret" (Gizli Şifre) barındırmaz. Bu sayede uygulamanın derlenmiş hali başkalarıyla güvenle paylaşılabilir. Kodlama bilmeyen arkadaşlarınız bile tek tıkla kendi Spotify hesaplarını güvenle bağlayabilir.
-* ♻️ **Zen Kütüphane (Tek Liste Stratejisi):** Her hafta "Haftalık Mod 1, 2, 3..." diye onlarca liste oluşturup Spotify'ınızı çöplüğe çevirmez. Sadece bir adet **"Haftalık Modum"** listesi oluşturur ve her hafta içini acımasızca temizleyip yeni şaheserlerle doldurur.
-* 📱 **Görünmez Senkronizasyon (Catch-up):** Müzik sadece bilgisayarda dinlenmez! Bilgisayarınız kapalıyken telefonda dinlediğiniz müzikler kaybolmaz. Uygulama açıldığı an eksik verileri Spotify'dan çeker ve açığı kapatır.
-* 🩺 **Kendi Kendini Onarma (Self-Healing):** İnternet mi koptu? Giriş biletinizin (Token) süresi mi doldu? Program asla çökmez; bozuk dosyaları tespit edip yok eder ve sizi nazikçe yeni bir giriş ekranına yönlendirir.
+## ✨ Temel Özellikler (Mühendislik & Deneyim)
 
-## 🏗️ Kaputun Altında Ne Var? (Mimari)
-Proje, "Tek Sorumluluk Prensibi" (SOLID) merkeze alınarak tasarlanmıştır ve son kullanıcıya yönelik tek tıkla çalışacak (`.exe` / `.app`) bir formata dönüşmeye hazırdır.
+- 🏷️ **Organik Ruh Hali Analizi (Data Enrichment):** Şarkılarınızı ruhsuz, kapalı kutu algoritmalarla değil; milyonlarca insanın girdiği _"melankolik", "gece sürüşü", "yüksek enerji"_ gibi gerçek Last.fm etiketleriyle analiz ederiz.
+- 🧠 **Haftalık Hafıza Kaybı (Ephemeral Data Strategy):** Algoritmalar geçmişinize pranga vurur. Bizim motorumuz ise her hafta sonu yerel SQLite hafızasını tamamen siler. Geçmiş önyargısını (bias) yok ederek %100 _o anki_ ruh halinize odaklanır.
+- ♻️ **Zen Kütüphane (Single-Playlist Strategy):** Her hafta yeni liste oluşturup kütüphanenizi çöplüğe çevirmez. Belirlenen tek bir "Haftalık Modum" listesinin içeriği her hafta otonom olarak temizlenir ve güncellenir.
+- 🛡️ **Görünmez Güvenlik (Stateless PKCE Auth):** Uygulama hiçbir şekilde statik bir `Client Secret` barındırmaz. İstemci tarafında maksimum güvenlik sağlar ve rahatça paylaşılabilir.
 
-* `database.py`: Kendi kendini kuran ve onaran yerel SQLite motoru.
-* `logger_config.py`: Merkezi ve standartlaştırılmış hata/log takip merkezi.
-* `spotify_api.py`: Şifresiz PKCE OAuth2 süreçleri, otonom veri çekimi.
-* `algorithm.py`: *(Geliştirme Aşamasında)* Beğenilen şarkılara ağırlık vererek ruh hali (mood) haritası çıkaran matematiksel beyin.
-* `main.py`: Tüm sistemi asenkron (Thread) olarak yöneten ana orkestra şefi.
+## 🏗️ Kaputun Altında Ne Var? (Mikroservis Mimarisi)
 
-## 🚀 Hemen Başla (Geliştiriciler İçin)
+Proje, "Tek Sorumluluk Prensibi" (SOLID) merkeze alınarak modüler bir yapıda tasarlanmıştır:
+
+- `database.py`: Kendi kendini kuran, şema doğrulamalı yerel veri bankamız.
+- `spotify_api.py`: PKCE yetkilendirmesini ve Spotify üzerindeki CRUD işlemlerini yöneten **1. İstihbarat Ajanımız.**
+- `lastfm_api.py`: Şarkı ve sanatçı bazlı etiket verilerini çekerek Spotify verilerini zenginleştiren **2. İstihbarat Ajanımız.**
+- `algorithm.py`: Veritabanındaki dinleme frekanslarını ve Last.fm etiketlerini ağırlıklandırarak (weighting) haftalık öneri setini hesaplayan **Matematiksel Beyin.**
+- `main.py`: Tüm modülleri ve zamanlanmış görevleri asenkron yöneten ana orkestratör.
+
+## 🚀 Hızlı Başlangıç
 
 1. Projeyi klonlayın ve motoru indirin:
    ```bash
-   pip install spotipy python-dotenv
+   pip install spotipy python-dotenv requests
+   ```
