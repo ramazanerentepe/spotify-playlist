@@ -53,8 +53,8 @@ class SpotifyClient:
                     'played_at': item['played_at']
                 }
                 tracks_data.append(clean_track)
-                logger.info(f"🎧 Son dinlenen {len(tracks_data)} şarkı başarıyla çekildi.")
-                return tracks_data
+            logger.info(f"🎧 Son dinlenen {len(tracks_data)} şarkı başarıyla çekildi.")
+            return tracks_data
         except Exception as e:
             logger.error(f"Spotify API hatası (get_recently_played): {e}")
             return []
@@ -100,8 +100,8 @@ class SpotifyClient:
                         "added_at": item['added_at']
                     })
                 ofset_count += 1
-                logger.info(f"❤️ Kütüphanedeki tüm {len(liked_tracks)} beğenilen şarkı başarıyla çekildi.")
-                return liked_tracks
+            logger.info(f"❤️ Kütüphanedeki tüm {len(liked_tracks)} beğenilen şarkı başarıyla çekildi.")
+            return liked_tracks
         except Exception as e:
             logger.error(f"Spotify API hatası (get_liked_tracks): {e}")
             return []
