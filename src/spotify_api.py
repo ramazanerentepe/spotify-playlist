@@ -1,6 +1,7 @@
 import os
 import logging
 import spotipy
+import datetime
 from spotipy.oauth2 import SpotifyPKCE
 from dotenv import load_dotenv
 from logger_config import setup_logger 
@@ -15,7 +16,7 @@ class SpotifyClient:
         if not self.client_id or not self.redirect_uri:
             logger.error("SPOTIPY_CLIENT_ID veya SPOTIPY_REDIRECT_URI .env dosyasında tanımlı değil!")
             raise ValueError("Gerekli Spotify API bilgileri eksik.")
-        self.scope = "user-read-recently-played user-library-read playlist-modify-public playlist-modify-private"
+        self.scope = "user-read-recently-played user-library-read playlist-modify-public playlist-modify-private playlist-read-private"
         self.auth_manager = SpotifyPKCE(client_id=self.client_id, redirect_uri=self.redirect_uri, scope=self.scope)
         self.sp = None
         logger.info("✅ Spotify API motoru başlatıldı, kimlik belgeleri hazırlandı.")
@@ -120,7 +121,7 @@ class SpotifyClient:
                         return item['id']
                 ofset_count += 1
             user_id = self.sp.me()['id']
-            new_playlist = self.sp.user_playlist_create(user=user_id, name=name, public=True, description=description)
+            new_playlist = self.sp.user_playlist_create(user=user_id, name=name, public=False, description=description)
             logger.info(f"✅ '{name}' adlı yeni çalma listesi oluşturuldu, ID'si: {new_playlist['id']}")
             return new_playlist['id']
         except Exception as e:
@@ -157,32 +158,30 @@ if __name__ == "__main__":
     spotify_bot = SpotifyClient()
     spotify_bot.authenticate()
     
-    # 2. Son dinlenenleri çek (Testin hızlı bitmesi için limit koymadık, API'den geleni alır)
+    # 2. Son dinlenenleri çek
     logger.info("--- TEST 1: Son Dinlenenler ---")
     recent_tracks = spotify_bot.get_recently_played()
     
-    # 3. Audio Features Testi (Eğer recent_tracks boş değilse)
+    # 3. Audio Features (Spotify Yasakladığı için hata verecek ama program çökmeyecek)
     if recent_tracks:
         logger.info("--- TEST 2: Müzikal Özellikler ---")
-        # Elimizdeki sözlükten sadece track_id'leri cımbızlayıp bir liste yapıyoruz
         test_track_ids = [track['track_id'] for track in recent_tracks]
         features = spotify_bot.get_audio_features(test_track_ids)
     
-    # 4. Beğenilenleri çek
-    logger.info("--- TEST 3: Beğenilen Şarkılar (Sayfalama Testi) ---")
-    # Çok uzun sürmemesi için bir zaman sınırı koyabilirsin (isteğe bağlı) veya direkt çalıştırırsın.
-    # Burada direkt çalıştırıp kütüphanedeki sayfalama mantığını test ediyoruz.
-    liked = spotify_bot.get_liked_tracks(limit=50) 
+    # 4. Beğenilenleri çek (SADECE SON 1 HAFTA!)
+    logger.info("--- TEST 3: Beğenilen Şarkılar (1 Haftalık Sınır) ---")
+    # Şu anki zamandan 7 gün öncesini hesaplayıp Spotify'ın anladığı metin formatına çeviriyoruz:
+    bir_hafta_once = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    logger.info(f"Frenleme tarihi: {bir_hafta_once}")
+    
+    liked = spotify_bot.get_liked_tracks(limit=50, after_timestamp=bir_hafta_once) 
     
     # 5. Liste İşlemleri
     logger.info("--- TEST 4: Çalma Listesi Operasyonları ---")
     playlist_id = spotify_bot.get_or_create_playlist(name="Haftalık Modum Test", description="API Test Listesidir.")
     
     if playlist_id:
-        # Önce listeyi temizle
         spotify_bot.clear_playlist(playlist_id)
-        
-        # Sonra elimizdeki o test_track_ids listesini bas!
         if recent_tracks:
             spotify_bot.update_playlist_tracks(playlist_id, test_track_ids)
             
