@@ -150,11 +150,11 @@ class SpotifyClient:
             logger.error(f"Spotify API hatası (update_playlist_tracks - ID toplama): {e}")
             return
 
-# Modül testi için (Test Pisti)
+# Modül testi için (Test Pisti) - GÜNCELLENDİ
 if __name__ == "__main__":
     logger.info("🚀 SPOTIFY API GENEL TESTİ BAŞLIYOR...")
     
-    # 1. Motoru çalıştır ve giriş yap
+    # 1. Motoru başlat
     spotify_bot = SpotifyClient()
     spotify_bot.authenticate()
     
@@ -162,22 +162,22 @@ if __name__ == "__main__":
     logger.info("--- TEST 1: Son Dinlenenler ---")
     recent_tracks = spotify_bot.get_recently_played()
     
+    # KRİTİK DÜZELTME: Şarkı ID'lerini bir listeye topluyoruz
+    test_track_ids = [t['track_id'] for t in recent_tracks] if recent_tracks else []
     
-    # 4. Beğenilenleri çek (SADECE SON 1 HAFTA!)
+    # 3. Beğenilenleri çek (SADECE SON 1 HAFTA!)
     logger.info("--- TEST 3: Beğenilen Şarkılar (1 Haftalık Sınır) ---")
-    # Şu anki zamandan 7 gün öncesini hesaplayıp Spotify'ın anladığı metin formatına çeviriyoruz:
     bir_hafta_once = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%SZ')
     logger.info(f"Frenleme tarihi: {bir_hafta_once}")
-    
     liked = spotify_bot.get_liked_tracks(limit=50, after_timestamp=bir_hafta_once) 
     
-    # 5. Liste İşlemleri
+    # 4. Liste İşlemleri
     logger.info("--- TEST 4: Çalma Listesi Operasyonları ---")
     playlist_id = spotify_bot.get_or_create_playlist(name="Haftalık Modum Test", description="API Test Listesidir.")
     
     if playlist_id:
         spotify_bot.clear_playlist(playlist_id)
-        if recent_tracks:
+        if test_track_ids: # Yukarıda oluşturduğumuz listeyi kullanıyoruz
             spotify_bot.update_playlist_tracks(playlist_id, test_track_ids)
             
     logger.info("🎉 TÜM TESTLER BAŞARIYLA TAMAMLANDI!")
