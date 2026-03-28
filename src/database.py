@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import logging
-from logger_config import setup_logger
+from src.logger_config import setup_logger
 
 logger = setup_logger("SpotifyDB")
 class SpotifyDB:

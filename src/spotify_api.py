@@ -4,7 +4,7 @@ import spotipy
 import datetime
 from spotipy.oauth2 import SpotifyPKCE
 from dotenv import load_dotenv
-from logger_config import setup_logger 
+from src.logger_config import setup_logger 
 
 logger = setup_logger("SpotifyAPI")
 
