@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import dotenv
 import logging
@@ -40,6 +41,11 @@ class LastFMClient:
             return []
 
     def get_track_tags(self, artist_name, track_name, limit=5):
+        clean_track = re.sub(r"\(.*?\)|-.*", "", track_name).strip()
+        if clean_track != track_name:
+            logger.info(f"🔍 Şarkı adı temizlendi: '{track_name}' → '{clean_track}'")
+            track_name = clean_track
+
         params = {
 
             'method': 'track.getTopTags',
@@ -73,8 +79,8 @@ if __name__ == "__main__":
     # Ajanımızı (sınıfımızı) uyandırıyoruz.
     lastfm_bot = LastFMClient()
     
-    # Ajanımıza Daft Punk'ın Get Lucky şarkısını araştır diyoruz.
-    bulunan_etiketler = lastfm_bot.get_track_tags(artist_name="Radiohead", track_name="Creep")
+    # Test için özellikle KİRLİ (feat. içeren) bir şarkı gönderiyoruz
+    bulunan_etiketler = lastfm_bot.get_track_tags(artist_name="Daft Punk", track_name="Get Lucky (feat. Pharrell Williams) - Radio Edit")
     
     # Gelen cevabı ekrana yazdırıyoruz.
     print(f"Test Sonucu: {bulunan_etiketler}")
