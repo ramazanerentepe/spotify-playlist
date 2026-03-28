@@ -54,7 +54,6 @@ class LastFMClient:
             response = requests.get(self.base_url, params=params, timeout=5)
             response.raise_for_status()
             data = response.json()
-            print(f"🕵️‍♂️ GELEN HAM VERİ: {data}")
             if 'toptags' in data and 'tag' in data['toptags']:
                 tags = data['toptags']['tag']
                 top_tags = [tag['name'].lower() for tag in tags[:limit]]
@@ -75,7 +74,7 @@ if __name__ == "__main__":
     lastfm_bot = LastFMClient()
     
     # Ajanımıza Daft Punk'ın Get Lucky şarkısını araştır diyoruz.
-    bulunan_etiketler = lastfm_bot.get_track_tags(artist_name="BLOK3", track_name="KUSURA BAKMA")
+    bulunan_etiketler = lastfm_bot.get_track_tags(artist_name="Radiohead", track_name="Creep")
     
     # Gelen cevabı ekrana yazdırıyoruz.
     print(f"Test Sonucu: {bulunan_etiketler}")
