@@ -33,6 +33,19 @@ class SpotifyDB:
                     "CREATE INDEX IF NOT EXISTS idx_track_artist ON tracks(artist_name)"
                 ]
             },
+            "track_tags": {
+                "columns": {"track_id", "tag_name"},
+                "create_sql": '''
+                    CREATE TABLE IF NOT EXISTS track_tags (
+                        track_id TEXT NOT NULL,
+                        tag_name TEXT NOT NULL,
+                        FOREIGN KEY (track_id) REFERENCES tracks (track_id) ON DELETE CASCADE,
+                        UNIQUE(track_id, tag_name)
+                    )''',
+                "indices": [
+                    "CREATE INDEX IF NOT EXISTS idx_tag_name ON track_tags(tag_name)"
+                ]
+            },
             "listening_history": {
                 "columns": {"history_id", "track_id", "played_at"},
                 "create_sql": '''
@@ -199,6 +212,7 @@ class SpotifyDB:
             DELETE FROM listening_history;
             DELETE FROM liked_tracks;
             DELETE FROM tracks;
+            DELETE FROM track_tags;
         '''
         try:
             with self.get_connection() as conn:
@@ -227,7 +241,23 @@ class SpotifyDB:
         except sqlite3.Error as e:
             logger.error(f"Haftalık şarkıları çekerken veritabanı hatası oluştu: {e}")
             return []
-
+    def add_track_tags(self, track_id, tags):
+        if not tags:
+            return
+        
+        sql = ''' 
+            INSERT OR IGNORE INTO track_tags (track_id, tag_name) 
+            VALUES (?, ?)
+            '''
+        try:
+            with self.get_connection() as conn:
+                data_to_insert = [(track_id, tag) for tag in tags]
+                conn.executemany(sql, data_to_insert)
+                conn.commit()
+                logger.info(f"🏷️ Track ID {track_id} için {len(tags)} etiket (tag) başarıyla kaydedildi.")
+        except sqlite3.Error as e:
+            logger.error(f"Şarkı etiketleri eklenirken veritabanı hatası oluştu: {e}")
+    
 # Modül testi için
 if __name__ == "__main__":
     db_manager = SpotifyDB()
