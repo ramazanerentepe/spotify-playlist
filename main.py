@@ -36,5 +36,12 @@ def sync_listening_data():
 
 if __name__ == "__main__":
     logger.info("🚀 Motoru Çalıştırıldı!")
-
-    sync_listening_data()
+    while True:
+        try:
+            sync_listening_data()
+            logger.info("⏰ 5 dakika bekleniyor...")
+            time.sleep(300)  
+        except Exception as e:
+            logger.error(f"❌ Hata oluştu: {e}")  
+            logger.info("⏰ 30 dakika bekleniyor...")
+            time.sleep(1800)
