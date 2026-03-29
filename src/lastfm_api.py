@@ -75,6 +75,34 @@ class LastFMClient:
         except Exception as e:
             logger.error(f"Last.fm API hatası (get_track_tags): {e}")
             return []
+        
+    def get_tracks_by_tag(self, tag_name, limit=10):
+        params = {
+            'method': 'tag.getTopTracks',
+            'tag': tag_name,
+            'api_key': self.api_key,
+            'format': 'json',
+            'limit': limit
+        }
+        try:
+            response = requests.get(self.base_url, params=params, timeout=5)
+            response.raise_for_status()
+            data = response.json()
+            if 'tracks' in data and 'track' in data['tracks']:
+                tracks = data['tracks']['track']
+                recommended_tracks = []
+                for t in tracks:
+                    recommended_tracks.append({
+                        'artist': t['artist']['name'],
+                        'track': t['name']
+                    })
+                logger.info(f"🎧 Last.fm'den '{tag_name}' etiketi için {len(recommended_tracks)} şarkı tavsiyesi çekildi.")
+                return recommended_tracks
+            return []
+        except Exception as e:
+            logger.error(f"Last.fm API hatası (get_tracks_by_tag): {e}")
+            return []
+    
 if __name__ == "__main__":
     # Ajanımızı (sınıfımızı) uyandırıyoruz.
     lastfm_bot = LastFMClient()
