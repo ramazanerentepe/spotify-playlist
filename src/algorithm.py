@@ -58,15 +58,24 @@ class WeeklyAlgorithm:
             return []
         
     def _discover_new_tracks(self, top_tags, played_track_ids, needed_count):
-        """
-        GÖREV: Last.fm ve Spotify köprüsünü kurup, yankı odasını kırarak yepyeni şarkılar bulmak.
-        1. top_tags içindeki her bir etiket için Last.fm'den (get_tracks_by_tag) şarkı isimlerini çek.
-        2. Gelen her bir şarkı adı ve sanatçısını Spotify'da (search_track) aratıp ID'sini bul.
-        3. FİLTRE: Bulunan ID geçerliyse VE played_track_ids (bu hafta dinlenenler) içinde YOKSA listene ekle.
-        4. Topladığın yeni şarkı sayısı 'needed_count' (kalan boşluk) sayısına ulaştığı an döngüleri kır (break).
-        5. Bulduğun bu taptaze yeni şarkı ID'lerini döndür.
-        """
-        pass
+        try:
+            new_track_ids = []
+            for tag in top_tags:
+                tag_name = tag[0]
+                recommended_tracks = self.lastfm.get_tracks_by_tag(tag_name , limit=10)
+                for rec_track in recommended_tracks:
+                    if len(new_track_ids) >= needed_count:
+                        break
+                    sp_id = self.spotify.search_track(rec_track['artist'], rec_track['track'])
+                    if sp_id and sp_id not in played_track_ids and sp_id not in new_track_ids:
+                        new_track_ids.append(sp_id)
+                        logger.info(f"Yeni şarkı keşfedildi: {rec_track['track']} - {rec_track['artist']} (Spotify ID: {sp_id})")
+                if len(new_track_ids) >= needed_count:
+                    break
+            return new_track_ids
+        except Exception as e:
+            logger.error(f"Yeni şarkılar keşfedilirken hata: {e}")
+            return []
 
     def generate_playlist(self):
         """
