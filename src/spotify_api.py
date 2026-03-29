@@ -150,6 +150,18 @@ class SpotifyClient:
         except Exception as e:
             logger.error(f"Spotify API hatası (update_playlist_tracks - ID toplama): {e}")
             return
+    
+    def search_track(self, artist_name, track_name):
+        try:
+           query = f"artist:{artist_name} track:{track_name}"
+           result = self.sp.search(q=query, type='track', limit=1)
+           if result['tracks']['items']:
+               track_id = result['tracks']['items'][0]['id']
+               return track_id
+            return None
+        except Exception as e:
+            logger.error(f"Spotify arama hatası ({artist_name} - {track_name}): {e}")
+            return None
 
 # Modül testi için (Test Pisti) - GÜNCELLENDİ
 if __name__ == "__main__":
