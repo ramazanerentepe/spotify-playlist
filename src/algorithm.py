@@ -8,24 +8,33 @@ logger = setup_logger("Algorithm")
 class WeeklyAlgorithm:
     
     def __init__(self):
-        """
-        GÖREV: İstihbarat ajanlarını ve veritabanını hayata geçirmek.
-        1. self.db = SpotifyDB() ile kasayı bağla.
-        2. self.spotify ve self.lastfm ajanlarını başlat.
-        3. Spotify ajanının arama yapabilmesi için 'authenticate()' metodunu çağırıp uyandır.
-        """
-        pass
+        try:
+            self.db = SpotifyDB()
+            logger.info("Veritabanı bağlantısı başarılı.")
+            self.spotify = SpotifyClient()
+            logger.info("Spotify ajanı başlatıldı.")
+            self.lastfm = LastFMClient()
+            logger.info("Last.fm ajanı başlatıldı.")
+            self.spotify.authenticate()
+            logger.info("Spotify ajanı başarıyla doğrulandı.")
+            logger.info("Algoritma başarıyla başlatıldı.")
+        except Exception as e:
+            logger.error(f"Algoritma başlatılırken hata: {e}")
+            raise e
 
     def _calculate_playlist_length(self, total_tracks):
-        """
-        GÖREV: Dinamik liste uzunluğunu belirlemek.
-        1. total_tracks sayısının %25'ini al ve tam sayıya (int) çevir.
-        2. Eğer sonuç 10'dan küçükse 10 döndür.
-        3. Eğer sonuç 50'den büyükse 50 döndür.
-        4. İkisinin arasındaysa bulduğun sayıyı döndür.
-        !!!NOT DEĞERLERLE OYNA!!!!
-        """
-        pass
+        try:
+            total_tracks = int(total_tracks)
+            calculated_length = int(total_tracks * 0.25)
+            if calculated_length < 20:
+                calculated_length = 20
+            elif calculated_length > 100:
+                calculated_length = 100
+            logger.info(f"Toplam şarkı: {total_tracks}, Hesaplanan liste uzunluğu: {calculated_length}")    
+            return calculated_length 
+        except Exception as e:
+            logger.error(f"Playlist uzunluğu hesaplanırken hata: {e}")
+            return 20  
 
     def _build_safe_zone(self, weekly_tracks):
         """
