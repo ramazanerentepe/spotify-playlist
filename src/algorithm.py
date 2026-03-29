@@ -37,15 +37,26 @@ class WeeklyAlgorithm:
             return 20  
 
     def _build_safe_zone(self, weekly_tracks):
-        """
-        GÖREV: Listenin temelini (Beğenilenler ve Top 3) oluşturmak.
-        1. Gelen weekly_tracks listesindeki şarkıları dön. 'is_liked' (8. indeks) 1 olanların ID'lerini bir listeye al.
-        2. Şarkıları 'play_count' (7. indeks) değerine göre büyükten küçüğe sırala.
-        3. En baştaki 3 şarkıyı al, eğer az önce oluşturduğun listede yoklarsa onları da ekle.
-        4. Bu güvenli şarkı ID'lerinin olduğu listeyi (safe_track_ids) döndür.
-        """
-        pass
-
+        try:
+            safe_track_ids = []
+            for track in weekly_tracks:
+                if track[8] == 1:  
+                    safe_track_ids.append(track[0])
+                    logger.info(f"Beğenilen şarkı eklendi: {track[0]}")
+            top_played = sorted(weekly_tracks, key=lambda x: x[7], reverse=True)
+            added_top_tracks = 0
+            for track in top_played:
+                if added_top_tracks >= 3:
+                    break
+                if track[0] not in safe_track_ids:
+                    safe_track_ids.append(track[0])
+                    added_top_tracks += 1
+                    logger.info(f"Top şarkı eklendi: {track[0]} (Play Count: {track[7]})")
+            return safe_track_ids
+        except Exception as e:
+            logger.error(f"Güvenli bölge oluşturulurken hata: {e}")
+            return []
+        
     def _discover_new_tracks(self, top_tags, played_track_ids, needed_count):
         """
         GÖREV: Last.fm ve Spotify köprüsünü kurup, yankı odasını kırarak yepyeni şarkılar bulmak.
