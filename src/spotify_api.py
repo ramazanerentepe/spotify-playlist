@@ -158,7 +158,7 @@ class SpotifyClient:
            if result['tracks']['items']:
                track_id = result['tracks']['items'][0]['id']
                return track_id
-            return None
+           return None
         except Exception as e:
             logger.error(f"Spotify arama hatası ({artist_name} - {track_name}): {e}")
             return None
