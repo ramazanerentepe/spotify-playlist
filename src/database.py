@@ -257,6 +257,24 @@ class SpotifyDB:
                 logger.info(f"🏷️ Track ID {track_id} için {len(tags)} etiket (tag) başarıyla kaydedildi.")
         except sqlite3.Error as e:
             logger.error(f"Şarkı etiketleri eklenirken veritabanı hatası oluştu: {e}")
+
+    def get_top_weekly_tags(self, limit = 10):
+        sql ='''
+            SELECT tag_name, COUNT(tag_name) AS tag_count
+            FROM track_tags
+            GROUP BY tag_name
+            ORDER BY tag_count DESC
+            LIMIT ?
+            '''
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.execute(sql, (limit,))
+                top_tags = cursor.fetchall()
+                logger.info(f"Haftanın en popüler etiketleri çekildi: {len(top_tags)} etiket bulundu.")
+                return top_tags
+        except sqlite3.Error as e:
+            logger.error(f"Haftalık en popüler etiketler çekilirken veritabanı hatası oluştu: {e}")
+            return []
     
 # Modül testi için
 if __name__ == "__main__":
