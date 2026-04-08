@@ -78,17 +78,26 @@ class WeeklyAlgorithm:
             return []
 
     def generate_playlist(self):
-        """
-        GÖREV: ANA ORKESTRATÖR. Yukarıdaki tüm parçaları birleştirip nihai listeyi basmak.
-        1. DB'den haftalık şarkıları (get_weekly_tracks) çek. Boşsa işlemi durdur (return []).
-        2. _calculate_playlist_length ile hedef uzunluğu (target_length) bul.
-        3. Yankı odası kalkanı için haftalık şarkıların ID'lerini bir Set (küme) içine al (played_track_ids).
-        4. _build_safe_zone fonksiyonunu çağırıp güvenli şarkıları al ve final_playlist listene koy.
-        5. Kalan boşluğu (target_length - len(final_playlist)) hesapla.
-        6. Eğer boşluk varsa: DB'den en iyi 3 etiketi çek, _discover_new_tracks'i çağır, gelen yeni şarkıları final_playlist'e ekle.
-        7. final_playlist'i tam target_length sayısından kesip döndür.
-        """
-        pass
+        try:
+                week_tracks = self.db.get_weekly_tracks()
+                if not week_tracks:
+                    logger.warning("Haftalık şarkı bulunamadı. Çalma listesi oluşturulamayacak.")
+                    return []
+                played_track_ids = set(track[0] for track in week_tracks)
+                target_length = self._calculate_playlist_length(len(week_tracks))
+                finally_playlist = self._build_safe_zone(week_tracks)
+                needed_count = target_length - len(finally_playlist)
+                if needed_count > 0:
+                    top_tags = self.db.get_top_weekly_tags(limit=5)
+                    new_tracks = self._discover_new_tracks(top_tags, played_track_ids, needed_count)
+                    finally_playlist.extend(new_tracks)
+
+                finally_playlist = finally_playlist[:target_length]
+                logger.info(f"🎉 AI DJ görevi tamamladı! Toplam {len(finally_playlist)} şarkılık liste hazır.")
+                return finally_playlist
+        except Exception as e:
+            logger.error(f"Çalma listesi oluşturulurken hata: {e}")
+            return []
 
 if __name__ == "__main__":
     # Test Pisti
