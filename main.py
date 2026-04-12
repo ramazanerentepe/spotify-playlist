@@ -82,8 +82,6 @@ def sync_listening_data():
 
 if __name__ == "__main__":
     logger.info("🚀 AI DJ Motoru Çalıştırıldı!")
-    run_weekly_dj() # Manuel testi kapattık, otopilottayız
-
     while True:
         try:
             sync_listening_data()
