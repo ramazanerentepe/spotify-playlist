@@ -140,9 +140,3 @@ class WeeklyAlgorithm:
         except Exception as e:
             logger.error(f"Haftalık rapor parametreleri hesaplanırken hata: {e}")
             return None
-
-if __name__ == "__main__":
-    # Test Pisti
-    brain = WeeklyAlgorithm()
-    liste = brain.generate_playlist()
-    print(f"Oluşturulan Çalma Listesi ID'leri: {liste}")

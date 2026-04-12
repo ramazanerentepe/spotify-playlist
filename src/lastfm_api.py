@@ -103,12 +103,3 @@ class LastFMClient:
             logger.error(f"Last.fm API hatası (get_tracks_by_tag): {e}")
             return []
     
-if __name__ == "__main__":
-    # Ajanımızı (sınıfımızı) uyandırıyoruz.
-    lastfm_bot = LastFMClient()
-    
-    # Test için özellikle KİRLİ (feat. içeren) bir şarkı gönderiyoruz
-    bulunan_etiketler = lastfm_bot.get_track_tags(artist_name="Daft Punk", track_name="Get Lucky (feat. Pharrell Williams) - Radio Edit")
-    
-    # Gelen cevabı ekrana yazdırıyoruz.
-    print(f"Test Sonucu: {bulunan_etiketler}")
