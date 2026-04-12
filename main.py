@@ -52,6 +52,7 @@ def sync_listening_data():
         last_report = db.get_last_report_date()
         if last_played:
             dt = datetime.datetime.strptime(last_played[:19], "%Y-%m-%dT%H:%M:%S")
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
             after_timestamp = int(dt.timestamp() * 1000)
             breakpoint = last_played
         elif last_report:
