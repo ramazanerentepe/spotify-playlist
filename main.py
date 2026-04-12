@@ -49,12 +49,20 @@ def sync_listening_data():
         db.init_db()
 
         last_played = db.get_last_played_time()
+        last_report = db.get_last_report_date()
         if last_played:
             dt = datetime.datetime.strptime(last_played[:19], "%Y-%m-%dT%H:%M:%S")
             after_timestamp = int(dt.timestamp() * 1000)
+            breakpoint = last_played
+        elif last_report:
+            logger.info("ℹ️ Kasa temizlendiği için son rapor tarihine göre takip başlatılıyor.")
+            dt = datetime.datetime.strptime(last_report[:19], "%Y-%m-%d %H:%M:%S")
+            after_timestamp = int(dt.timestamp() * 1000)
+            breakpoint = last_report.replace(" ", "T") + "Z"
         else:
-            after_timestamp = int(time.time() * 1000)
-            logger.info("ℹ️ Veritabanı yeni temizlendiği için geçmiş çekilmiyor, takip şimdi başlıyor.")
+            logger.info("ℹ️ İlk kurulum: Sistem şu andan 5 dakika öncesinden dinlemeye başlıyor.")
+            after_timestamp = int((time.time() - 300) * 1000)
+            breakpoint = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%SZ')
         recent_tracks = spotify_client.get_recently_played(after_timestamp=after_timestamp)
         if not recent_tracks:
             logger.info("🎵 Yeni dinlenen şarkı bulunamadı, 5 dakika sonra tekrar denenecek.")
@@ -73,10 +81,6 @@ def sync_listening_data():
             time.sleep(0.5)
         logger.info(f"✅ Toplam {len(recent_tracks)} yeni şarkı başarıyla işlendi ve hafızaya alındı!")
 
-        breakpoint = last_played
-        if not breakpoint:
-            breakpoint = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%SZ')
-            logger.info(f"⚠️ Kasa boş! Beğenilenler için 1 haftalık fren uygulandı: {breakpoint}")
         liked_tracks = spotify_client.get_liked_tracks(after_timestamp=breakpoint)
         for item in liked_tracks:
             db.add_liked_track(item['track_id'])
