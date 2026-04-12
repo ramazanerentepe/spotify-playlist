@@ -318,9 +318,4 @@ class SpotifyDB:
                 return last_report_date  
         except sqlite3.Error as e:
             logger.error(f"Son rapor tarihini çekerken veritabanı hatası oluştu: {e}")
-            return None
-        
-# Modül testi için
-if __name__ == "__main__":
-    db_manager = SpotifyDB()
-    db_manager.init_db()
+            return None 
