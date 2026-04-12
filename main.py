@@ -43,7 +43,13 @@ def sync_listening_data():
         db.init_db()
 
         last_played = db.get_last_played_time()
-        recent_tracks = spotify_client.get_recently_played(after_timestamp=last_played)
+        if last_played:
+            dt = datetime.datetime.strptime(last_played[:19], "%Y-%m-%dT%H:%M:%S")
+            after_timestamp = int(dt.timestamp() * 1000)
+        else:
+            after_timestamp = int(time.time() * 1000)
+            logger.info("ℹ️ Veritabanı yeni temizlendiği için geçmiş çekilmiyor, takip şimdi başlıyor.")
+        recent_tracks = spotify_client.get_recently_played(after_timestamp=after_timestamp)
         if not recent_tracks:
             logger.info("🎵 Yeni dinlenen şarkı bulunamadı, 5 dakika sonra tekrar denenecek.")
             return
@@ -76,7 +82,7 @@ def sync_listening_data():
 
 if __name__ == "__main__":
     logger.info("🚀 AI DJ Motoru Çalıştırıldı!")
-    run_weekly_dj() # Manuel test
+    run_weekly_dj() # Manuel testi kapattık, otopilottayız
 
     while True:
         try:
@@ -84,7 +90,22 @@ if __name__ == "__main__":
             
             now = datetime.datetime.now()
             
-            if now.weekday() == 6 and now.hour == 23 and now.minute >= 50:
+            is_sunday_night = (now.weekday() == 6 and now.hour == 23 and now.minute >= 50)
+            
+            is_seven_days_passed = False
+            db = SpotifyDB() 
+            first_played = db.get_first_played_time()
+            
+            if first_played:
+                try:
+                    first_dt = datetime.datetime.strptime(first_played[:19], "%Y-%m-%dT%H:%M:%S")
+                    if (now - first_dt).days >= 7:
+                        is_seven_days_passed = True
+                        logger.info("⚠️ Pazar gecesi kaçırılmış! B Planı devreye giriyor: Kasa 7 günlük sınırını doldurdu.")
+                except Exception as e:
+                    logger.warning(f"Tarih hesaplanırken ufak bir hata: {e}")
+
+            if is_sunday_night or is_seven_days_passed:
                 logger.info("⏰ Vakit geldi! Haftalık DJ sahneye çıkıyor...")
                 run_weekly_dj()
                 
