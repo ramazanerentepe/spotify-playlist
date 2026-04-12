@@ -60,7 +60,12 @@ def sync_listening_data():
                 db.add_track_tags(track_id, tags)
             time.sleep(0.5)
         logger.info(f"✅ Toplam {len(recent_tracks)} yeni şarkı başarıyla işlendi ve hafızaya alındı!")
-        liked_tracks = spotify_client.get_liked_tracks(after_timestamp=last_played)
+
+        breakpoint = last_played
+        if not breakpoint:
+            breakpoint = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%SZ')
+            logger.info(f"⚠️ Kasa boş! Beğenilenler için 1 haftalık fren uygulandı: {breakpoint}")
+        liked_tracks = spotify_client.get_liked_tracks(after_timestamp=breakpoint)
         for item in liked_tracks:
             db.add_liked_track(item['track_id'])
         logger.info(f"❤️ {len(liked_tracks)} yeni beğenilen şarkı kontrol edildi ve kasaya eklendi.")
