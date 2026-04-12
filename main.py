@@ -31,7 +31,7 @@ def run_weekly_dj():
         else:
             spotify = SpotifyClient()
             spotify.authenticate()
-            playlist_id = spotify.get_or_create_playlist("Haftalık DJ", "Sizin için haftalık olarak güncellenen özel çalma listesi.")
+            playlist_id = spotify.get_or_create_playlist("Haftalık Modum", "Ruh halime göre her hafta otomatik güncellenir.")
             spotify.clear_playlist(playlist_id)
             spotify.update_playlist_tracks(playlist_id, new_tracks)
             db = SpotifyDB()
