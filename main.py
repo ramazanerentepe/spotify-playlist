@@ -9,18 +9,6 @@ from src.logger_config import setup_logger
 logger = setup_logger("Main")
 
 def run_weekly_dj():
-    """
-    GÖREV: Haftalık Yapay Zeka DJ'ini uyandırıp Spotify listesini günceller.
-    
-    1. WeeklyAlgorithm sınıfından bir 'brain' (beyin) objesi oluştur.
-    2. brain.generate_playlist() fonksiyonunu çağırıp yeni şarkı ID'lerini al.
-    3. Eğer liste boş değilse:
-       - SpotifyClient'ı başlat ve authenticate() ile yetki al.
-       - spotify.get_or_create_playlist() ile hedef listeyi bul/oluştur.
-       - spotify.clear_playlist() ile listenin içini boşalt.
-       - spotify.update_playlist_tracks() ile yeni şarkıları listeye doldur.
-       - SpotifyDB'yi başlat ve .clear_weekly_data() ile veritabanını yeni hafta için sıfırla.
-    """
     try:
         logger.info("🎧 Haftalık DJ başlatılıyor...")
         brain = WeeklyAlgorithm()
@@ -72,6 +60,10 @@ def sync_listening_data():
                 db.add_track_tags(track_id, tags)
             time.sleep(0.5)
         logger.info(f"✅ Toplam {len(recent_tracks)} yeni şarkı başarıyla işlendi ve hafızaya alındı!")
+        liked_tracks = spotify_client.get_liked_tracks(after_timestamp=last_played)
+        for item in liked_tracks:
+            db.add_liked_track(item['track_id'])
+        logger.info(f"❤️ {len(liked_tracks)} yeni beğenilen şarkı kontrol edildi ve kasaya eklendi.")
 
     except Exception as e:
         logger.error(f"❌ Veri senkronizasyonu sırasında hata: {e}")

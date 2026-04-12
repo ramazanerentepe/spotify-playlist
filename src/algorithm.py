@@ -42,7 +42,7 @@ class WeeklyAlgorithm:
             for track in weekly_tracks:
                 if track[8] == 1:  
                     safe_track_ids.append(track[0])
-                    logger.info(f"Beğenilen şarkı eklendi: {track[0]}")
+                    logger.info(f"❤️ Beğenilen şarkı listeye eklendi: {track[1]} - {track[2]} ID :  {track[0]}")
             top_played = sorted(weekly_tracks, key=lambda x: x[7], reverse=True)
             added_top_tracks = 0
             for track in top_played:
@@ -51,7 +51,7 @@ class WeeklyAlgorithm:
                 if track[0] not in safe_track_ids:
                     safe_track_ids.append(track[0])
                     added_top_tracks += 1
-                    logger.info(f"Top şarkı eklendi: {track[0]} (Play Count: {track[7]})")
+                    logger.info(f"🔥 Haftanın Top Şarkısı eklendi: {track[1]} - {track[2]} ({track[7]} kere dinlendi) ID : {track[0]}")
             return safe_track_ids
         except Exception as e:
             logger.error(f"Güvenli bölge oluşturulurken hata: {e}")
@@ -86,13 +86,12 @@ class WeeklyAlgorithm:
                 played_track_ids = set(track[0] for track in week_tracks)
                 target_length = self._calculate_playlist_length(len(week_tracks))
                 finally_playlist = self._build_safe_zone(week_tracks)
-                needed_count = target_length - len(finally_playlist)
+                needed_count = target_length
                 if needed_count > 0:
                     top_tags = self.db.get_top_weekly_tags(limit=5)
                     new_tracks = self._discover_new_tracks(top_tags, played_track_ids, needed_count)
                     finally_playlist.extend(new_tracks)
 
-                finally_playlist = finally_playlist[:target_length]
                 logger.info(f"🎉 AI DJ görevi tamamladı! Toplam {len(finally_playlist)} şarkılık liste hazır.")
                 return finally_playlist
         except Exception as e:
