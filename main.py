@@ -23,6 +23,12 @@ def run_weekly_dj():
             spotify.clear_playlist(playlist_id)
             spotify.update_playlist_tracks(playlist_id, new_tracks)
             db = SpotifyDB()
+            report_data = brain.create_weekly_summary()
+            if report_data:
+                db.save_weekly_report(report_data)
+                logger.info("✅ Haftalık rapor başarıyla arşivlendi.")
+            else :
+                logger.warning("⚠️ Haftalık rapor oluşturulamadı, arşivleme atlanacak.")
             db.clear_weekly_data()
             logger.info("🎉 Haftalık liste başarıyla Spotify'a gönderildi ve kasa sıfırlandı!")
             
