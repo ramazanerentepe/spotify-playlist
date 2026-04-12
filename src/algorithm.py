@@ -1,3 +1,4 @@
+import datetime
 from src.database import SpotifyDB
 from src.spotify_api import SpotifyClient
 from src.lastfm_api import LastFMClient
@@ -97,6 +98,48 @@ class WeeklyAlgorithm:
         except Exception as e:
             logger.error(f"Çalma listesi oluşturulurken hata: {e}")
             return []
+
+    def create_weekly_summary(self):
+        try:
+            week_tracks = self.db.get_weekly_tracks()
+            if not week_tracks:
+                logger.warning("Raporlanacak şarkı bulunamadı.")
+                return None
+
+            created_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            total_ms = sum((track[3] or 0) * track[7] for track in week_tracks)
+            total_minutes = int(total_ms / 60000)
+
+            sorted_by_play = sorted(week_tracks, key=lambda x: x[7], reverse=True)
+            top_1 = f"{sorted_by_play[0][1]} - {sorted_by_play[0][2]}" if len(sorted_by_play) > 0 else None
+            top_2 = f"{sorted_by_play[1][1]} - {sorted_by_play[1][2]}" if len(sorted_by_play) > 1 else None
+            top_3 = f"{sorted_by_play[2][1]} - {sorted_by_play[2][2]}" if len(sorted_by_play) > 2 else None
+
+            liked_count = sum(1 for track in week_tracks if track[8] == 1)
+
+            top_tags = self.db.get_top_weekly_tags(limit=1)
+            mood_label = top_tags[0][0].title() if top_tags else "Bilinmiyor"
+
+            report_data = (
+                created_at,    
+                total_minutes, 
+                top_1,         
+                top_2,         
+                top_3,        
+                None,          
+                None,          
+                None,          
+                mood_label,    
+                liked_count    
+            )
+
+            logger.info(f"📈 Haftalık özet hesaplandı. Toplam Süre: {total_minutes} dk, Ruh Hali: {mood_label}")
+            return report_data
+
+        except Exception as e:
+            logger.error(f"Haftalık rapor parametreleri hesaplanırken hata: {e}")
+            return None
 
 if __name__ == "__main__":
     # Test Pisti
