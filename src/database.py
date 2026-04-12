@@ -201,6 +201,20 @@ class SpotifyDB:
         except sqlite3.Error as e:
             logger.error(f"Son dinleme zamanını çekerken veritabanı hatası oluştu: {e}")
             return None
+    
+    def get_first_played_time(self):
+        sql = ''' 
+            SELECT MIN(played_at) FROM listening_history'''
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.execute(sql)
+                result = cursor.fetchone()
+                first_played = result[0] if result and result[0] else None
+                logger.info(f"İlk dinleme zamanı: {first_played}")
+                return first_played  
+        except sqlite3.Error as e:
+            logger.error(f"İlk dinleme zamanını çekerken veritabanı hatası oluştu: {e}")
+            return None
 
     def clear_weekly_data(self):
         """
