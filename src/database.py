@@ -289,6 +289,7 @@ class SpotifyDB:
         except sqlite3.Error as e:
             logger.error(f"Haftalık en popüler etiketler çekilirken veritabanı hatası oluştu: {e}")
             return []
+    
     def save_weekly_report(self ,report_data):
         sql = '''
             INSERT INTO weekly_reports
@@ -302,7 +303,23 @@ class SpotifyDB:
                 logger.info("📊 Haftalık rapor başarıyla kaydedildi.")
         except sqlite3.Error as e:
             logger.error(f"Haftalık rapor kaydedilirken veritabanı hatası oluştu: {e}")
+    
 
+    def get_last_report_date(self):
+        sql = '''
+            SELECT MAX(created_at) FROM weekly_reports
+        '''
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.execute(sql)
+                result = cursor.fetchone()
+                last_report_date = result[0] if result and result[0] else None
+                logger.info(f"Son rapor tarihi: {last_report_date}")
+                return last_report_date  
+        except sqlite3.Error as e:
+            logger.error(f"Son rapor tarihini çekerken veritabanı hatası oluştu: {e}")
+            return None
+        
 # Modül testi için
 if __name__ == "__main__":
     db_manager = SpotifyDB()
