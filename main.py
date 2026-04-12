@@ -79,7 +79,7 @@ def sync_listening_data():
 
 if __name__ == "__main__":
     logger.info("🚀 AI DJ Motoru Çalıştırıldı!")
-    # run_weekly_dj() # Manuel test
+    run_weekly_dj() # Manuel test
 
     while True:
         try:
