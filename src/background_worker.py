@@ -1,7 +1,22 @@
+import sys
+import platform
+import pathlib
+from src.logger_config import setup_logger
 
+logger = setup_logger("StartupWorker")
 class StartupWorker:
-    def __init__(self, app_name):
-        pass
+    def __init__(self, app_name : str) -> None:
+        self.app_name = app_name
+        self.os_name = platform.system()
+        self.script_path = (pathlib.Path(__file__).parent.parent / "main.py").resolve()
+        if not self.script_path.is_file():
+            error_msg = f"Başlangıca eklenecek hedef dosya bulunamadı: {self.script_path}"
+            logger.error(f"❌ Kritik Hata: {error_msg}")
+            raise FileNotFoundError(error_msg)
+        logger.info(f"✅ StartupWorker başlatıldı. OS: {self.os_name}, Hedef: {self.script_path.name}") #daha sonra kaldırılacak
+        
+        
+
 
     def _is_compiled(self):
         # 2. ARAŞTIR: Uygulamanın PyInstaller ile paketlenip paketlenmediğini 
