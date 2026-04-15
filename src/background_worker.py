@@ -49,6 +49,18 @@ class StartupWorker:
         # Formatın nasıl olması gerektiğini ve launchctl ile nasıl aktif edileceğini kurgula.
         pass
 
-    def apply_startup(self):
-        # 7. İşletim sistemini tespit ederek uygun startup kurulum fonksiyonunu çağır.
-        pass
+    def apply_startup(self) -> None:
+        try:
+            install_methods = {
+                "Windows": self._install_windows_startup,
+                "Linux": self._install_linux_startup,
+                "Darwin": self._install_mac_startup
+            }
+            target_method = install_methods.get(self.os_name)
+            if target_method:
+                target_method()  
+            else:
+                logger.warning(f"⚠️ {self.os_name} işletim sistemi için otomatik başlangıç desteği henüz yok.")
+            logger.info("✅ StartupWorker işlemi tamamlandı.")
+        except Exception as e:
+            logger.error(f"❌ Başlangıç kaydı kontrol edilirken hata oluştu: {e}")
