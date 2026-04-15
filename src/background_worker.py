@@ -18,10 +18,8 @@ class StartupWorker:
         
 
 
-    def _is_compiled(self):
-        # 2. ARAŞTIR: Uygulamanın PyInstaller ile paketlenip paketlenmediğini 
-        # 'sys.frozen' bayrağına bakarak anlayan bir mantık yaz. (True/False dön)
-        pass
+    def _is_compiled(self) -> bool:
+        return getattr(sys, 'frozen', False)
 
     def _get_silent_command(self):
         # 3. İşletim sistemine ve '_is_compiled' durumuna göre, siyah konsol
