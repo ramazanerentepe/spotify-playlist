@@ -14,18 +14,20 @@ class StartupWorker:
             logger.error(f"❌ Kritik Hata: {error_msg}")
             raise FileNotFoundError(error_msg)
         logger.info(f"✅ StartupWorker başlatıldı. OS: {self.os_name}, Hedef: {self.script_path.name}") #daha sonra kaldırılacak
-        
-        
-
 
     def _is_compiled(self) -> bool:
         return getattr(sys, 'frozen', False)
 
-    def _get_silent_command(self):
-        # 3. İşletim sistemine ve '_is_compiled' durumuna göre, siyah konsol
-        # penceresi açmadan çalışacak doğru terminal komutunu string olarak üret.
-        pass
-
+    def _get_silent_command(self) -> str:
+        #paketlenmiş uygulamalarda, sys.executable üzerinden çalıştırılacak komutun tam yolunu döndürür.
+        if self._is_compiled():
+            return f'"{sys.executable}"'
+        #windows'ta pythonw.exe kullanarak konsolsuz çalıştırma, diğer platformlarda normal python komutu yeterli olacaktır.
+        if self.os_name == "Windows":
+            return f'"{sys.executable.replace("python.exe", "pythonw.exe")}" "{self.script_path}"'
+        # Diğer platformlarda normal python komutu kullanılır.
+        return f'"{sys.executable}" "{self.script_path}"'
+        
     def _install_windows_startup(self):
         # 4. 'winreg' kütüphanesini kullanarak Windows Registry'sine kayıt ekle.
         pass
