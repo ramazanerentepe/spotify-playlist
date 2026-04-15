@@ -28,9 +28,17 @@ class StartupWorker:
         # Diğer platformlarda normal python komutu kullanılır.
         return f'"{sys.executable}" "{self.script_path}"'
         
-    def _install_windows_startup(self):
-        # 4. 'winreg' kütüphanesini kullanarak Windows Registry'sine kayıt ekle.
-        pass
+    def _install_windows_startup(self) -> None:
+        import winreg
+        try:
+            key_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_ALL_ACCESS)
+            winreg.SetValueEx(key, self.app_name, 0, winreg.REG_SZ, self._get_silent_command())
+            winreg.CloseKey(key)
+            logger.info(f"✅ Windows başlangıç kaydı eklendi: {self.app_name}")
+        except Exception as e:
+            logger.error(f"❌ Windows başlangıç kaydı eklenirken hata: {e}")
+            raise
 
     def _install_linux_startup(self):
         # 5. Linux'ta '~/.config/autostart/' dizinine .desktop dosyası oluştur.
